@@ -1,3 +1,7 @@
+# CHANGELOGS ------
+version='1.0.1'
+#Fixed a bug where error checks would still move to the next loop.
+#Structure and code improvements
 import os
 import time as t
 
@@ -8,10 +12,31 @@ class User:
         self.balance=balance
 
     def deposit(self, deposit_amount):
-        self.balance+=deposit_amount
+        if deposit_amount<=0:
+            print('Please enter a valid amount')
+            toast()
+            return
+        
+        else:
+            self.balance+=deposit_amount
+            print(f'${deposit_amount:.2f} despoited into your account succesfuly!')
+            toast()
 
     def withdraw(self, withdraw_amount):
-        self.balance-=withdraw_amount
+        if withdraw_amount<=0:
+            print('Please enter a valid amount')
+            toast()
+            return
+
+        elif withdraw_amount>self.balance:
+            print('You are NOT Elon Musk.')
+            toast()
+            return
+
+        else:
+            self.balance-=withdraw_amount
+            print(f'${withdraw_amount:.2f} succesfully withdrawn from your account!')
+            toast()
 
 #Test mode:
 user1=User('Ziyad', 16, 500)
@@ -40,42 +65,24 @@ while True:
     elif c=='2':
         print(f'Deposal =======================')
         try:
-            amount=int(input(' Enter deposit amount: '))
+            amount=float(input('Enter deposit amount: '))
         except ValueError:
             print('Please enter a valid amount')
             toast()
+            continue
 
-        if amount<=0:
-            print('Please enter a valid amount')
-            toast()
-
-        else:
-            print(f'Depositing ${amount:.2f} into your account...')
-            cuser.deposit(amount)
-            print(f'${amount:.2f} despoited into your account succesfuly!')
-            toast()
+        cuser.deposit(amount)
 
     elif c=='3':
         print(f'Withdrawal =========== Balance: ${cuser.balance:.2f}')
         try:
-            amount=int(input(' Enter withdrawal amount: '))
+            amount=float(input(' Enter withdrawal amount: '))
         except ValueError:
             print('Please enter a valid amount')
             toast()
+            continue
 
-        if amount<=0:
-            print('Please enter a valid amount')
-            toast()
-
-        if amount>cuser.balance:
-            print('You are NOT Elon Musk.')
-            toast()
-
-        else:
-            print(f'Withdrawing ${amount:.2f} from your account...')
-            cuser.withdraw(amount)
-            print(f'${amount:.2f} succesfully withdrawn from your account!')
-            toast()
+        cuser.withdraw(amount)
 
     elif c=='4':
         raise SystemExit()
