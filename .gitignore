@@ -3,3 +3,4 @@ venv/
 .env/
 *.pyc
 accounts.json
+.DS_Store
