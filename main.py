@@ -1,15 +1,46 @@
 # CHANGELOGS ------
-version='1.0.1'
-#Fixed a bug where error checks would still move to the next loop.
-#Structure and code improvements
-import os
-import time as t
+#-Added account creation and log in and authentication
+#-Major redesign
+#-Bug fixes
+version='1.1'
 
+import os
+import json
+import time as t
+import random
+os.system('clear')
+
+FILE_PATH=os.path.join(os.path.dirname(__file__), "accounts.json")
+
+accounts=[]
+
+#FILE READING --------------------
+
+    #CREATING FILE STRUCTURE ------
+if not os.path.isfile(FILE_PATH) or os.path.getsize(FILE_PATH)==0: #if it doesn't exist OR is empty
+    with open(FILE_PATH, "w") as file:
+        json.dump(accounts, file, indent=4)
+
+    #CHECKING FOR CORRUPTED FILE -------
+with open(FILE_PATH, "r") as file:
+    try:
+        json.load(file)
+    except json.JSONDecodeError:
+        print("File is corrupted... Formating file.")
+        with open (FILE_PATH, "w") as file:
+            json.dump(accounts, file, indent=4)
+            t.sleep(1.5)
+
+    ##UPDATING VARIABLES ------
+with open(FILE_PATH, 'r') as file:
+    accounts=json.load(file)
+    
 class User:
-    def __init__(self, name, age, balance):
-        self.name=name
+    def __init__(self, username, age, balance, password):
+        self.username=username
         self.age=age
         self.balance=balance
+        self.password=password
 
     def deposit(self, deposit_amount):
         if deposit_amount<=0:
@@ -38,19 +69,105 @@ class User:
             print(f'${withdraw_amount:.2f} succesfully withdrawn from your account!')
             toast()
 
-#Test mode:
-user1=User('Ziyad', 16, 500)
-
-cuser=user1
+def save():
+    with open(FILE_PATH, 'w') as file:
+       json.dump(accounts, file, indent=4)
 
 def toast():
     t.sleep(1.5)
 
 def goback():
-    input('Press Enter to go back ')
+    input('\nPress Enter to go back ')
+
+def auth(username, age, balance, password):
+    global cuser
+    cuser=User(username, age, balance, password)
+
+def create_account():
+    os.system('clear')
+    print('----- Create a new ATM For Teens account -----\n')
+    username=str(input('Username: '))
+    for account in accounts:
+        if username in account:
+            print('Username taken, please choose another one.')
+            toast()
+            create_account()
+
+    check = False
+
+    while check == False:
+        try:
+            age=float(input('Age: '))
+            check = True
+        except ValueError:
+            print('Enter a valid age')
+            toast()
+        
+
+    password=input('Password: ')
+
+    check = False
+
+    while check == False:
+        password_check=input('Verify password: ')
+        if password==password_check:
+            check = True
+        else:
+            print('Passwords do not match')
+            toast()
+        
+   
+    accounts.append({
+        username:{
+            'age':age,
+            'balance':0,
+            'password':password
+        }
+    })
+
+    print('Account created succesfully')
+    auth(username, age, 0, password)
+    toast()
+
+def log_in():
+    os.system('clear')
+    username=input('Username: ')
+
+    password=input('Password: ')
+    check = None
+    for account in accounts:
+        if username in account:
+            if account[username]['password']==password:
+                check = True
+                auth(username, account[username]['age'], account[username]['balance'], password)
+                return
+            else:
+                print('Password is incorecct, try again.')
+                toast()
+                log_in()
+
+    if check == None:
+        print('Your account does not exist. ')
+        toast()
+        log_in()
+
+
+#MAIN APP --------------------------------------------
+os.system('clear')
+
+print('Welcome back to your ATM!')
+c=input('\nPress Enter to Log in, Press c + enter to create an account\n')
+
+if c=='':
+    log_in()
+
+else:
+    create_account()
+    save()
 
 while True:
-    print('=============================\n             ATM            \n=============================\n')
+    os.system('clear')
+    print('===============================\n         ATM For Teens         \n===============================')
     print('1-Check Balance')
     print('2-Deposit Money')
     print('3-Withdraw Money')
@@ -59,11 +176,11 @@ while True:
     c=input('Choose an option: ')
 
     if c=='1':
-        print(f'Balance ================ {cuser.name}\nYou currently have ${cuser.balance:.2f}')
+        print(f'Balance', '-'*15, f'{cuser.username}\nYou currently have ${cuser.balance:.2f}')
         goback()
 
     elif c=='2':
-        print(f'Deposal =======================')
+        print(f'Deposit =======================')
         try:
             amount=float(input('Enter deposit amount: '))
         except ValueError:
