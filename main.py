@@ -1,12 +1,12 @@
 # CHANGELOGS ------
-#-Changed the structure of accounts fron a list to a dict of dicts.
-#-Fixed a bug where the balance doesnt get updated in the JSON file.
-version='1.1.1'
+#- Removed the old checks in the while loops in login and account creation for a better strucutre.
+#- Account creation now requires an age between 12 to 17.99.
+#- Fixed save() (it used to write the memory with outdated json file which was incorecct)
+version='1.1.2'
 
 import os
 import json
 import time as t
-import random
 os.system('clear')
 
 FILE_PATH=os.path.join(os.path.dirname(__file__), "accounts.json")
@@ -82,34 +82,33 @@ def create_account():
     os.system('clear')
     print('----- Create a new ATM For Teens account -----\n')
     username=str(input('Username: '))
-    for account in accounts:
-        if username in account:
-            print('Username taken, please choose another one.')
-            toast()
-            create_account()
+    if username in accounts:
+        print('Username taken, please choose another one.')
+        toast()
+        create_account()
 
-    check = False
-
-    while check == False:
+    while True:
         try:
             age=float(input('Age: '))
-            check = True
+            if 12<=age<18:
+                break
+            else:
+                print("You are not eligible for ATM For Teens. ")
+                exit()
         except ValueError:
             print('Enter a valid age')
             toast()
         
-
     password=input('Password: ')
 
-    check = False
-
-    while check == False:
+    while True:
         password_check=input('Verify password: ')
         if password==password_check:
-            check = True
+            break
         else:
             print('Passwords do not match')
             toast()
+            os.system('clear')
         
    
     accounts[username] = {
@@ -125,27 +124,24 @@ def log_in():
     os.system('clear')
     username=input('Username: ')
 
-    password=input('Password: ')
-    if username in accounts:
-        if accounts[username]['password']==password:
-            auth(username, accounts[username]['age'], accounts[username]['balance'], password)
-            return
+    while True:
+        password=input('Password: ')
+        if username in accounts:
+            if accounts[username]['password']==password:
+                auth(username, accounts[username]['age'], accounts[username]['balance'], password)
+                return
+            else:
+                print('Password is incorecct, try again.')
+                toast()
+                os.system('clear')
         else:
-            print('Password is incorecct, try again.')
+            print('Your account does not exist. ')
             toast()
-            log_in()
-
-    else:
-        print('Your account does not exist. ')
-        toast()
-        log_in()
 
 def save():
-    with open(FILE_PATH, 'r') as file:
-        accounts=json.load(file)
-        accounts[cuser.username]['balance']=cuser.balance
+    accounts[cuser.username]['balance'] = cuser.balance
     with open(FILE_PATH, 'w') as file:
-       json.dump(accounts, file, indent=4)
+        json.dump(accounts, file, indent=4)
 
 
 #MAIN APP --------------------------------------------
