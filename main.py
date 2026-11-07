@@ -1,8 +1,7 @@
 # CHANGELOGS ------
-#-Added account creation and log in and authentication
-#-Major redesign
-#-Bug fixes
-version='1.1'
+#-Changed the structure of accounts fron a list to a dict of dicts.
+#-Fixed a bug where the balance doesnt get updated in the JSON file.
+version='1.1.1'
 
 import os
 import json
@@ -12,7 +11,7 @@ os.system('clear')
 
 FILE_PATH=os.path.join(os.path.dirname(__file__), "accounts.json")
 
-accounts=[]
+accounts={}
 
 #FILE READING --------------------
 
@@ -69,10 +68,6 @@ class User:
             print(f'${withdraw_amount:.2f} succesfully withdrawn from your account!')
             toast()
 
-def save():
-    with open(FILE_PATH, 'w') as file:
-       json.dump(accounts, file, indent=4)
-
 def toast():
     t.sleep(1.5)
 
@@ -117,13 +112,10 @@ def create_account():
             toast()
         
    
-    accounts.append({
-        username:{
+    accounts[username] = {
             'age':age,
             'balance':0,
-            'password':password
-        }
-    })
+            'password':password}
 
     print('Account created succesfully')
     auth(username, age, 0, password)
@@ -134,22 +126,26 @@ def log_in():
     username=input('Username: ')
 
     password=input('Password: ')
-    check = None
-    for account in accounts:
-        if username in account:
-            if account[username]['password']==password:
-                check = True
-                auth(username, account[username]['age'], account[username]['balance'], password)
-                return
-            else:
-                print('Password is incorecct, try again.')
-                toast()
-                log_in()
+    if username in accounts:
+        if accounts[username]['password']==password:
+            auth(username, accounts[username]['age'], accounts[username]['balance'], password)
+            return
+        else:
+            print('Password is incorecct, try again.')
+            toast()
+            log_in()
 
-    if check == None:
+    else:
         print('Your account does not exist. ')
         toast()
         log_in()
+
+def save():
+    with open(FILE_PATH, 'r') as file:
+        accounts=json.load(file)
+        accounts[cuser.username]['balance']=cuser.balance
+    with open(FILE_PATH, 'w') as file:
+       json.dump(accounts, file, indent=4)
 
 
 #MAIN APP --------------------------------------------
@@ -160,6 +156,7 @@ c=input('\nPress Enter to Log in, Press c + enter to create an account\n')
 
 if c=='':
     log_in()
+    save()
 
 else:
     create_account()
@@ -207,5 +204,7 @@ while True:
     else:
         print('Please choose a valid option')
         toast()
+
+    save()
 
     os.system('clear')
