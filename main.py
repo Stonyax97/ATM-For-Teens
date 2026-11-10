@@ -1,9 +1,8 @@
 # CHANGELOGS ------
-#- Transaction history is now available!
-#-Still needs more design refinemets (obv)
+#- Removed leftover test stuff from preview
+#- Refined transaction history
 
-#- Transactions is a list inside the user's dict.
-version='1.2 Preview'
+version='1.2'
 
 import os
 import json
@@ -37,7 +36,6 @@ with open(FILE_PATH, 'r') as file:
     accounts=json.load(file)
     
 class User:
-    global i
     def __init__(self, username, age, balance, password, transactions):
         self.username=username
         self.age=age
@@ -53,8 +51,8 @@ class User:
         
         else:
             self.balance+=deposit_amount
-            self.transactions.append({'time': datetime.now().strftime("%Y/%m/%d at %H:%M"), 
-                                      'type': 'deposit', 
+            self.transactions.append({'time': datetime.now().strftime("%Y-%m-%d %H:%M"), 
+                                      'type': 'Deposit', 
                                       'amount': deposit_amount})
             print(f'${deposit_amount:.2f} despoited into your account succesfuly!')
             toast()
@@ -72,8 +70,8 @@ class User:
 
         else:
             self.balance-=withdrawal_amount
-            self.transactions.append({'time': datetime.now().strftime("%Y/%m/%d at %H:%M"), 
-                                      'type': 'withdrawal', 
+            self.transactions.append({'time': datetime.now().strftime("%Y-%m-%d %H:%M"),
+                                      'type': 'Withdrawal', 
                                       'amount': withdrawal_amount})
             print(f'${withdrawal_amount:.2f} succesfully withdrawn from your account!')
             toast()
@@ -126,13 +124,11 @@ def create_account():
             'age':age,
             'balance':0,
             'password':password,
-            'i':0,
             'transactions':[]
             }
 
     print('Account created succesfully')
-    #auth(username, age, 0, password)
-    cuser=User(username, age, 0, password, [])
+    auth(username, age, 0, password, [])
     toast()
 
 def log_in():
@@ -144,7 +140,6 @@ def log_in():
         else:
             print('Your account does not exist. ')
             toast()
-
 
     while True:
         password=input('Password: ')
@@ -218,7 +213,7 @@ while True:
         os.system('clear')
         print(f'Transactions ------------ {len(cuser.transactions)}')
         for banana in range(len(cuser.transactions)):
-            print(cuser.transactions[banana]) #i dont have enough time to finish it today but it will look better nex time.
+            print(f'- {cuser.transactions[banana]['type']} of ${cuser.transactions[banana]['amount']:.2f} at {cuser.transactions[banana]['time']}')
         goback()
     
     
