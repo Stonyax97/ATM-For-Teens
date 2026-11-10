@@ -1,8 +1,6 @@
 # CHANGELOGS ------
-#- Removed the old checks in the while loops in login and account creation for a better strucutre.
-#- Account creation now requires an age between 12 to 17.99.
-#- Fixed save() (it used to write the memory with outdated json file which was incorecct)
-version='1.1.2'
+#- Refractored the sign up and log in.
+version='1.1.3'
 
 import os
 import json
@@ -81,11 +79,14 @@ def auth(username, age, balance, password):
 def create_account():
     os.system('clear')
     print('----- Create a new ATM For Teens account -----\n')
-    username=str(input('Username: '))
-    if username in accounts:
-        print('Username taken, please choose another one.')
-        toast()
-        create_account()
+
+    while True:
+        username=str(input('Username: '))
+        if username in accounts:
+            print('Username taken, please choose another one.')
+            toast()
+        else:
+            break
 
     while True:
         try:
@@ -108,9 +109,7 @@ def create_account():
         else:
             print('Passwords do not match')
             toast()
-            os.system('clear')
         
-   
     accounts[username] = {
             'age':age,
             'balance':0,
@@ -122,20 +121,22 @@ def create_account():
 
 def log_in():
     os.system('clear')
-    username=input('Username: ')
+    while True:
+        username=input('Username: ')
+        if username in accounts:
+            break
+        else:
+            print('Your account does not exist. ')
+            toast()
+
 
     while True:
         password=input('Password: ')
-        if username in accounts:
-            if accounts[username]['password']==password:
-                auth(username, accounts[username]['age'], accounts[username]['balance'], password)
-                return
-            else:
-                print('Password is incorecct, try again.')
-                toast()
-                os.system('clear')
+        if accounts[username]['password']==password:
+            auth(username, accounts[username]['age'], accounts[username]['balance'], password)
+            break
         else:
-            print('Your account does not exist. ')
+            print('Password is incorecct, try again.')
             toast()
 
 def save():
