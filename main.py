@@ -1,10 +1,14 @@
 # CHANGELOGS ------
-#- Refractored the sign up and log in.
-version='1.1.3'
+#- Transaction history is now available!
+#-Still needs more design refinemets (obv)
+
+#- Transactions is a list inside the user's dict.
+version='1.2 Preview'
 
 import os
 import json
 import time as t
+from datetime import datetime
 os.system('clear')
 
 FILE_PATH=os.path.join(os.path.dirname(__file__), "accounts.json")
@@ -33,11 +37,13 @@ with open(FILE_PATH, 'r') as file:
     accounts=json.load(file)
     
 class User:
-    def __init__(self, username, age, balance, password):
+    global i
+    def __init__(self, username, age, balance, password, transactions):
         self.username=username
         self.age=age
         self.balance=balance
         self.password=password
+        self.transactions=transactions
 
     def deposit(self, deposit_amount):
         if deposit_amount<=0:
@@ -47,23 +53,29 @@ class User:
         
         else:
             self.balance+=deposit_amount
+            self.transactions.append({'time': datetime.now().strftime("%Y/%m/%d at %H:%M"), 
+                                      'type': 'deposit', 
+                                      'amount': deposit_amount})
             print(f'${deposit_amount:.2f} despoited into your account succesfuly!')
             toast()
 
-    def withdraw(self, withdraw_amount):
-        if withdraw_amount<=0:
+    def withdraw(self, withdrawal_amount):
+        if withdrawal_amount<=0:
             print('Please enter a valid amount')
             toast()
             return
 
-        elif withdraw_amount>self.balance:
+        elif withdrawal_amount>self.balance:
             print('You are NOT Elon Musk.')
             toast()
             return
 
         else:
-            self.balance-=withdraw_amount
-            print(f'${withdraw_amount:.2f} succesfully withdrawn from your account!')
+            self.balance-=withdrawal_amount
+            self.transactions.append({'time': datetime.now().strftime("%Y/%m/%d at %H:%M"), 
+                                      'type': 'withdrawal', 
+                                      'amount': withdrawal_amount})
+            print(f'${withdrawal_amount:.2f} succesfully withdrawn from your account!')
             toast()
 
 def toast():
@@ -72,9 +84,9 @@ def toast():
 def goback():
     input('\nPress Enter to go back ')
 
-def auth(username, age, balance, password):
+def auth(username, age, balance, password, transactions):
     global cuser
-    cuser=User(username, age, balance, password)
+    cuser=User(username, age, balance, password, transactions)
 
 def create_account():
     os.system('clear')
@@ -113,10 +125,14 @@ def create_account():
     accounts[username] = {
             'age':age,
             'balance':0,
-            'password':password}
+            'password':password,
+            'i':0,
+            'transactions':[]
+            }
 
     print('Account created succesfully')
-    auth(username, age, 0, password)
+    #auth(username, age, 0, password)
+    cuser=User(username, age, 0, password, [])
     toast()
 
 def log_in():
@@ -133,14 +149,16 @@ def log_in():
     while True:
         password=input('Password: ')
         if accounts[username]['password']==password:
-            auth(username, accounts[username]['age'], accounts[username]['balance'], password)
+            auth(username, accounts[username]['age'], accounts[username]['balance'], password, accounts[username]['transactions'])
             break
         else:
             print('Password is incorecct, try again.')
             toast()
 
 def save():
+    global cuser
     accounts[cuser.username]['balance'] = cuser.balance
+    accounts[cuser.username]['transactions'] = cuser.transactions
     with open(FILE_PATH, 'w') as file:
         json.dump(accounts, file, indent=4)
 
@@ -149,7 +167,7 @@ def save():
 os.system('clear')
 
 print('Welcome back to your ATM!')
-c=input('\nPress Enter to Log in, Press c + enter to create an account\n')
+c=input('\nPress Enter to Log in\nPress "C" then Enter to create an account\n')
 
 if c=='':
     log_in()
@@ -165,7 +183,8 @@ while True:
     print('1-Check Balance')
     print('2-Deposit Money')
     print('3-Withdraw Money')
-    print('4-Exit')
+    print('4-History')
+    print('5-Exit')
 
     c=input('Choose an option: ')
 
@@ -174,7 +193,7 @@ while True:
         goback()
 
     elif c=='2':
-        print(f'Deposit =======================')
+        print(f'Deposit -----------------------')
         try:
             amount=float(input('Enter deposit amount: '))
         except ValueError:
@@ -185,7 +204,7 @@ while True:
         cuser.deposit(amount)
 
     elif c=='3':
-        print(f'Withdrawal =========== Balance: ${cuser.balance:.2f}')
+        print(f'Withdrawal ------------ Balance: ${cuser.balance:.2f}')
         try:
             amount=float(input(' Enter withdrawal amount: '))
         except ValueError:
@@ -196,6 +215,14 @@ while True:
         cuser.withdraw(amount)
 
     elif c=='4':
+        os.system('clear')
+        print(f'Transactions ------------ {len(cuser.transactions)}')
+        for banana in range(len(cuser.transactions)):
+            print(cuser.transactions[banana]) #i dont have enough time to finish it today but it will look better nex time.
+        goback()
+    
+    
+    elif c=='5':
         raise SystemExit()
 
     else:
