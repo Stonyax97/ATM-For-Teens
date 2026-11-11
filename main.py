@@ -1,8 +1,8 @@
 # CHANGELOGS ------
-#- Removed leftover test stuff from preview
-#- Refined transaction history
+#- Added seconds to transaction time
+#- An account can only have up to 500$ in balance.
 
-version='1.2'
+version='1.2.1'
 
 import os
 import json
@@ -48,10 +48,15 @@ class User:
             print('Please enter a valid amount')
             toast()
             return
+
+        if deposit_amount + self.balance > 500:
+            print('You can only have up to $500 in your account')
+            toast()
+            return
         
         else:
             self.balance+=deposit_amount
-            self.transactions.append({'time': datetime.now().strftime("%Y-%m-%d %H:%M"), 
+            self.transactions.append({'time': datetime.now().strftime("%Y-%m-%d %H:%M:%S"), 
                                       'type': 'Deposit', 
                                       'amount': deposit_amount})
             print(f'${deposit_amount:.2f} despoited into your account succesfuly!')
@@ -70,7 +75,7 @@ class User:
 
         else:
             self.balance-=withdrawal_amount
-            self.transactions.append({'time': datetime.now().strftime("%Y-%m-%d %H:%M"),
+            self.transactions.append({'time': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                                       'type': 'Withdrawal', 
                                       'amount': withdrawal_amount})
             print(f'${withdrawal_amount:.2f} succesfully withdrawn from your account!')
