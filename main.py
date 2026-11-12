@@ -1,8 +1,10 @@
 # CHANGELOGS ------
-#- Added seconds to transaction time
-#- An account can only have up to 500$ in balance.
+#- ###This update is improvemets to the program thanks to r/PythonLearning and it's members on reddit.
 
-version='1.2.1'
+#- Refractored the transactions printing loop.
+#- Balance is built up from user transaction history.
+
+version='1.2.2'
 
 import os
 import json
@@ -55,7 +57,6 @@ class User:
             return
         
         else:
-            self.balance+=deposit_amount
             self.transactions.append({'time': datetime.now().strftime("%Y-%m-%d %H:%M:%S"), 
                                       'type': 'Deposit', 
                                       'amount': deposit_amount})
@@ -74,7 +75,6 @@ class User:
             return
 
         else:
-            self.balance-=withdrawal_amount
             self.transactions.append({'time': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                                       'type': 'Withdrawal', 
                                       'amount': withdrawal_amount})
@@ -127,7 +127,6 @@ def create_account():
         
     accounts[username] = {
             'age':age,
-            'balance':0,
             'password':password,
             'transactions':[]
             }
@@ -149,7 +148,7 @@ def log_in():
     while True:
         password=input('Password: ')
         if accounts[username]['password']==password:
-            auth(username, accounts[username]['age'], accounts[username]['balance'], password, accounts[username]['transactions'])
+            auth(username, accounts[username]['age'], 0, password, accounts[username]['transactions'])
             break
         else:
             print('Password is incorecct, try again.')
@@ -157,7 +156,13 @@ def log_in():
 
 def save():
     global cuser
-    accounts[cuser.username]['balance'] = cuser.balance
+    cuser.balance=0
+    for transaction in cuser.transactions:
+        if transaction['type'] == "Deposit":
+            cuser.balance+=transaction['amount']
+        elif transaction['type'] == 'Withdrawal':
+            cuser.balance-=transaction['amount']
+
     accounts[cuser.username]['transactions'] = cuser.transactions
     with open(FILE_PATH, 'w') as file:
         json.dump(accounts, file, indent=4)
@@ -217,10 +222,9 @@ while True:
     elif c=='4':
         os.system('clear')
         print(f'Transactions ------------ {len(cuser.transactions)}')
-        for banana in range(len(cuser.transactions)):
-            print(f'- {cuser.transactions[banana]['type']} of ${cuser.transactions[banana]['amount']:.2f} at {cuser.transactions[banana]['time']}')
+        for transaction in cuser.transactions:
+            print(f'- {transaction['type']} of ${transaction['amount']:.2f} at {transaction['time']}')
         goback()
-    
     
     elif c=='5':
         raise SystemExit()
